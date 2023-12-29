@@ -92,8 +92,45 @@ class WUS(US):
             indices[i] = index
             
         return self.rng[unknown][indices] 
+
+class AWUS_R(US):
+    """
+    van Houtum - 2021 - Adaptive Weighted Uncertainty Sampling
+    """
+    def reset(self,state):
+        shape = state.X.shape
+        self.H_o = np.random.randint(low=0, high=shape[1], size=shape[0])
+        self.epsilon = 0.001
+        self.rng = np.arange(shape[0])
     
-class AWUS(US):
+    def ratio_similarity(self,probas):
+        H_n = probas.argmax(axis=1)
+        d = np.count_nonzero(H_n==self.H_o) / len(H_n)
+        e = 1.0 / np.maximum(1-d,self.epsilon) - 1.0    
+        self.H_o = H_n
+        return e        
+    
+    def act(self,state,number=1):   
+        unknown = ~state.known      
+        n_unknown = np.count_nonzero(unknown)
+        number = np.minimum(n_unknown, number)    
+        
+        probas = state.probas(state.X)
+        e = self.ratio_similarity( probas )
+        s = self.score(probas[unknown]) 
+        n = s * probas.shape[1] / (probas.shape[1]-1)
+        w = (n+1.0)**e
+        
+        indices = np.zeros(number,dtype=int)
+
+        for i in np.arange(number):  
+            index = self.single_choice(w)
+            w[index] = 0
+            indices[i] = index
+            
+        return self.rng[unknown][indices] 
+
+class AWUS_C(US):
     """
     van Houtum - 2021 - Adaptive Weighted Uncertainty Sampling
     """
@@ -103,17 +140,20 @@ class AWUS(US):
         self.epsilon = 0.001
         self.rng = np.arange(shape[0])
 
+    def cosine_similarity(self,probas):
+        H_n = probas.argmax(axis=1)+1
+        d = np.dot(self.H_o,H_n) / (norm(self.H_o)*norm(H_n))
+        e = 1.0 / np.maximum(1-d,self.epsilon) - 1.0        
+        self.H_o = H_n
+        return e    
+    
     def act(self,state,number=1):   
         unknown = ~state.known      
         n_unknown = np.count_nonzero(unknown)
         number = np.minimum(n_unknown, number)    
         
         probas = state.probas(state.X)
-        H_n = probas.argmax(axis=1)+1
-        s = np.dot(self.H_o,H_n) / (norm(self.H_o)*norm(H_n))
-        self.H_o = H_n
-        d = np.arccos(np.minimum(1.0,s)) / np.pi
-        e = 1.0 / np.maximum(d,self.epsilon) - 2.0
+        e = self.cosine_similarity( probas )
         s = self.score(probas[unknown]) 
         n = s * probas.shape[1] / (probas.shape[1]-1)
         w = (n+1.0)**e
