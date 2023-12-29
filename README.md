@@ -8,6 +8,7 @@ This simulator is able to test newly created active learning strategies and dire
 compare them to other algorithms. 
 
 <img src="icons/active_learning.png">
+<img src="icons/rnd.png">
 <img src="icons/awus.png">
 
 ## Main Features / Comments
