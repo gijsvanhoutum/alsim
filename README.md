@@ -1,41 +1,19 @@
-# ALSIM: Active Learning SIMulator 
+# ALSIM: Active Learning Simulator
 
 **ALSIM** is an active learning strategy simulator. Active learning is a sub-domain
 of machine learning focused on the creation of machine learning models using the
 lowest amount of annotated data. This is especially interesting for applications
 where data acquisition and/or annotation is difficult, expensive and/or time-consuming.
-
 This simulator is able to test newly created active learning strategies and directly
 compare them to other algorithms. 
-
-application for video recording and playing. This application 
-is especially interesting for new camera devices if they are supported by
-Video4Linux.
 
 ## Main Features / Comments
 Major information:
 
-  - 4 Threads; GUI, Display, Recording, Data acquisition for speed.
-  - Multiple resolutions and frame rates through Video4Linux integration
-  - Easy to expand for new devices i.e. Dinolite-edge etc.
-  - Build with Python,Qt, OpenCV and Numpy
-  - Live frame-rate and frame-rate capacity (%) based on thread capacity
-
-## Dependencies
-Video4Linux device drivers are needed. To check run in terminal:
-```sh
-v4l2-ctl
-```
-If the package is not installed, install it with:
-```sh
-sudo apt install v4l-utils
-```
-After installation the visible devices can be checked with:
-```sh
-v4l2-ctl --list-devices
-```
-If no devices are visible, the application will not be able to capture any. 
-In that case only recorded videos can be played in the application.
+  - Multiple query strategies available out-of-the-box
+  - All Scikit-Learn machine learning models supported
+  - Fast custom ML models which are optimized for Active Learning available.
+  - Visualization build in. 
 
 ## How to get it
 
@@ -45,7 +23,7 @@ sudo apt install git
 ```
 Clone the repository to current working directory
 ```sh
-git clone https://github.com/gijsvanhoutum/trec.git
+git clone https://github.com/gijsvanhoutum/alsim.git
 ```
 We advise to install a new python virtual environment first with:
 ```sh
@@ -57,19 +35,15 @@ source venv/bin/activate
 ```
 Install all necessary Python packages with:
 ```sh
-pip install -r /trec/requirements.txt
+pip install -r /alsim/requirements.txt
 ```
 ## How to run it
 
 To run execute the following from the current working directory:
 ```sh
-python3 /trec/trec/main.py
+python3 run_simulations.py
 ```
 
 ## TODO
 
-- Make dynamic update of menu items possible in GUI. Currently, a newly created
-cannot be played back immediately. It requires a complete restart of the app.
-- Complete comments for all classes. 
-- Explore if completely switching to signals and slots, by replacing the 
-queues leads to even better performance.
+- Expand capabilities which is supported by the ALSIM AWUS paper version.
