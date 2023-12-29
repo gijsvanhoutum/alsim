@@ -1,6 +1,14 @@
 # ALSIM: Active Learning SIMulator 
 
-**TREC** is a GUI application for video recording and playing. This application 
+**ALSIM** is an active learning strategy simulator. Active learning is a sub-domain
+of machine learning focused on the creation of machine learning models using the
+lowest amount of annotated data. This is especially interesting for applications
+where data acquisition and/or annotation is difficult, expensive and/or time-consuming.
+
+This simulator is able to test newly created active learning strategies and directly
+compare them to other algorithms. 
+
+application for video recording and playing. This application 
 is especially interesting for new camera devices if they are supported by
 Video4Linux.
 

@@ -13,5 +13,5 @@ if __name__=="__main__":
     xiris_src = source_dir+r"\xiris"
     openml_src = source_dir+r"\openml\openml_28.txt"
         
-    # save_dataset( OpenmlDataset, openml_src, save_dir )
+    save_dataset( OpenmlDataset, openml_src, save_dir )
     save_dataset( XirisDataset, xiris_src, save_dir )

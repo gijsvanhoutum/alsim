@@ -89,7 +89,7 @@ class XirisDataset(Dataset):
         hgm = cls._histogram_of_gradient_magnitudes( frame, dim )
         hcm = cls._histogram_of_intensity_magnitudes( frame, dim )
         hist = np.hstack( (hgm,hcm))
-        return cls.log_norm_transform(hist).astype(np.float64)
+        return cls.log_norm_transform(hist).astype(np.float32)
     
     @classmethod
     def log_norm_transform(cls,hist):      
@@ -117,7 +117,6 @@ class XirisDataset(Dataset):
         hist = cv2.calcHist([frame],[0],None,[dim],[0,1]).ravel()
         return hist.astype(np.uint64)
         
-        
     @classmethod
     def get_datasets(cls, source_path, dim=8 ):
         
@@ -127,20 +126,22 @@ class XirisDataset(Dataset):
         for video_name in tqdm( os.listdir( source_path ) ):   
             video_path = os.path.join( source_path, video_name)
             
-            X,y = [],[]
+            X,I,y = [],[],[]
             for i,class_name in enumerate( os.listdir( video_path ) ):
                 class_path = os.path.join( video_path, class_name)     
                 for frame_name in os.listdir( class_path ):
                     frame_path = os.path.join( class_path, frame_name)
                     PIL_image = Image.open(frame_path)
                     np_image = np.array(PIL_image)
- 
+                    
+                    I.append(np_image)
                     X.append( cls._compress( np_image, dim=dim) )
-                    y.append( i )
+                    y.append( class_name )
 
             names.append(video_name)
             datasets.append( {"X":np.vstack(X).astype(np.float64),
-                                    "y":np.array(y).astype(np.uint8)} )
+                              "I":np.array(I).astype(np.uint8),
+                              "y":np.array(y).astype(str)} )
             
         
         lengths = [len(d["y"]) for d in datasets]

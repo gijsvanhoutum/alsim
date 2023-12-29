@@ -1,5 +1,5 @@
 import numpy as np
-from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import StandardScaler,MinMaxScaler
 from functools import partial
 
 class State:
@@ -43,8 +43,8 @@ class Environment:
         self.quality = partial(quality,labels=self.uy[:,None])
     
     def reset(self):
-        train = self._train()       
-        self._split(train)  
+        train,test = self._train()       
+        self._split(train,test)  
         self.known = np.ones(len(self.y_trn),dtype=np.bool)
         self.max_q = self.get_quality()
         self.train_nr = len(self.y_trn)
@@ -54,27 +54,33 @@ class Environment:
         self.done = self._update()      
         return self._state()
 
-    def _split(self, train ):    
+    def _split(self, train,test ):    
         scaler = StandardScaler() 
+        scaler = MinMaxScaler(feature_range=(-1,1))
         self.X_trn = scaler.fit_transform(self.X[train])
         self.y_trn = self.y[train]
-        self.X_tst = scaler.transform(self.X[~train])
-        self.y_tst = self.y[~train]
+        self.X_tst = scaler.transform(self.X[test])
+        self.y_tst = self.y[test]
     
     def _sample(self,mask,nr):
         p = mask / mask.sum()
         ids = np.random.choice(len(mask),size=nr,replace=False,p=p)
         return ids
                     
-    def _train(self):        
-        train = np.zeros(self.y.size,dtype=np.bool)
-        for k in self.uy:
-            m = (self.y==k).astype(int)
-            nr = int(np.count_nonzero(m) * self.ratio)
-            ids = self._sample(m,nr)
-            train[ids] = True    
-                    
-        return train
+    def _train(self): 
+        if self.ratio <= 0 or self.ratio >= 1:
+            train = test = np.ones(self.y.size,dtype=np.bool)
+        else:
+            train = np.zeros(self.y.size,dtype=np.bool)
+            for k in self.uy:
+                m = (self.y==k).astype(int)
+                nr = int(np.count_nonzero(m) * self.ratio)
+                ids = self._sample(m,nr)
+                train[ids] = True    
+                
+            test = ~train
+                        
+        return train,test
 
     def _initial(self, train ):
         known = np.zeros(self.y.size,dtype=np.bool) 
@@ -114,9 +120,8 @@ class Environment:
         return self.episode_qualities
         
     def _check(self, actions ):
-
         if not isinstance( actions ,np.ndarray):
-            raise TypeError("Wrong index type should be [list]")          
+            raise TypeError("Wrong index type: {} should be [list]".format(type(actions)))          
 
         if len(set(actions)) != len(actions):
             raise TypeError("Actions should be unique")  

@@ -1,7 +1,9 @@
 import os
+import sys
+sys.path.append(os.path.split(os.getcwd())[0])
+
 import pandas as pd
-import matplotlib
-# matplotlib.use('Agg')
+
 import matplotlib.pyplot as plt
 import numpy as np
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
@@ -18,7 +20,7 @@ def plot(ax,df,ticks,fs,name=True):
     if name==False:
         anchor = (0.4,0.1,1,1)
     else:
-        anchor = (-0.05,0.01,1,1)
+        anchor = (-0.075,0.01,1,1)
         
     axi = inset_axes(ax,width="60%", height="50%",loc="lower right",
                          bbox_to_anchor=anchor,
@@ -64,9 +66,9 @@ def plot(ax,df,ticks,fs,name=True):
     ax.yaxis.tick_right() 
     ax.yaxis.set_label_position("right")
     ax.set_xticks(ticks)
-    ax.set_xticklabels([int(t*100) for t in ticks],fontsize=fs)
+    ax.set_xticklabels([int(t*100) for t in ticks],fontsize=fs-2)
     ax.set_yticks(ticks)
-    ax.set_yticklabels([int(t*100) for t in ticks],fontsize=fs)
+    ax.set_yticklabels([int(t*100) for t in ticks],fontsize=fs-2)
     ax.set_ylim([-0.05,1.05])
     ax.set_xlim([-0.05,1.05])
 
@@ -94,28 +96,26 @@ def plot(ax,df,ticks,fs,name=True):
     axi.spines['right'].set_bounds(55,85)  
     return axi
     
-def save(fig,path,dpi=600):
-    # fig.savefig(path,
-    #             dpi=dpi,
-    #             bbox_inches='tight',
-    #             format="pdf",     
-    #         )  
-
-    pass
-
+def save(fig,path,dpi=300):
+    fig.savefig(path,
+                dpi=dpi,
+                bbox_inches='tight',
+                format="pdf",     
+            )  
     
 if __name__=="__main__":
     cwd = os.getcwd()
     
-    data_dir = cwd+r'\data'
+    save_dir = "../data/visualization/"  
+    data_path = "../data/simulation/results.pkl"  
+
     
-    save_dir = data_dir+r"\visualization"
-    save_name = "xiris2"
+
     N=2
-    fs=6
+    fs=8
     xlabel = "Annotated % of training dataset to reach BENCH"
     ylabel = "% of simulations"
-    df = pd.read_pickle(data_dir+r"\simulation\results.pkl")
+    df = pd.read_pickle(data_path)
 
     df["percentage"] = df["k"] / df["kmx"]
     n_clf = len(df["classifier"].unique())
@@ -134,7 +134,7 @@ if __name__=="__main__":
     
     figsize = mm2inch(90,80)
     gridspec = {"hspace":0.05,"wspace":0.025,
-                "top":0.99,"left":0.025,
+                "top":0.99,"left":0,
                 "right":0.9,"bottom":0.18}
     
     fig,axes = plt.subplots(ncols=1,
@@ -146,24 +146,24 @@ if __name__=="__main__":
     
     axi = plot(axes,df,ticks,fs)
     
-    axes.set_ylabel(ylabel,rotation=90,ha="center",va="center",fontsize=fs)#,labelpad=25)
-    axes.set_xlabel(xlabel,rotation=0,ha="center",va="center",fontsize=fs,labelpad=5)
+    axes.set_ylabel(ylabel,rotation=90,ha="center",va="center",fontsize=fs-2)#,labelpad=25)
+    axes.set_xlabel(xlabel,rotation=0,ha="center",va="center",fontsize=fs-2,labelpad=5)
 
     handles,labels = axi.get_legend_handles_labels()
     
     fig.legend(handles,labels, loc="lower center",
-                frameon=False,ncol=len(labels),fontsize=fs+1,columnspacing=1,handletextpad=0.25,handlelength=1)
+                frameon=False,ncol=len(labels),fontsize=fs,columnspacing=0.5,handletextpad=0.25,handlelength=0.75)
 
-    save(fig,save_dir+r"\fig1.pdf")
+    save(fig,save_dir+"F_overall.pdf")
  
     
     ##########################################################################
     # Plot PER BATCH and CLASSIFIER
     
-    figsize = mm2inch(190,160)
+    figsize = mm2inch(190,180)
     gridspec = {"hspace":0.05,"wspace":0.025,
-                "top":0.95,"left":0.075,
-                "right":0.925,"bottom":0.1}
+                "top":0.97,"left":0.05,
+                "right":0.95,"bottom":0.075}
     
     fig,axes = plt.subplots(ncols=n_clf,
                             nrows=n_btc,
@@ -174,33 +174,33 @@ if __name__=="__main__":
     
 
     for i, (clf,dfc) in enumerate( df.groupby("classifier") ):
-        axes[0,i].set_title(lookup_2[clf],fontsize=fs+1)
+        axes[0,i].set_title(lookup_2[clf],fontsize=fs)
         for j, (btc,dfb) in enumerate( dfc.groupby("batch") ):
             plot(axes[j,i],dfb,ticks,fs)
 
             if i==0:
                 axes[j,i].yaxis.set_label_position("left")
-                axes[j,i].set_ylabel(btc,fontsize=fs+1,rotation=0,ha="center",va="center",labelpad=10)
+                axes[j,i].set_ylabel(btc,fontsize=fs,rotation=0,ha="center",va="center",labelpad=15)
     
     handles,labels = axi.get_legend_handles_labels()
     
     fig.legend(handles,labels, loc="lower center",
-                frameon=False,ncol=len(labels),fontsize=fs+1)
+                frameon=False,ncol=len(labels),fontsize=fs)
     
-    fig.text(0.975,0.525,ylabel,rotation=90,ha="center",va="center",fontsize=fs)
-    fig.text(0.5,0.06,xlabel,rotation=0,ha="center",va="center",fontsize=fs)
+    fig.text(0.995,0.525,ylabel,rotation=90,ha="center",va="center",fontsize=fs-2)
+    fig.text(0.5,0.04,xlabel,rotation=0,ha="center",va="center",fontsize=fs-2)
     fig.text(0.025,0.525,"Batch\nsize",rotation=0,ha="center",va="center",fontsize=fs)
     
-    save(fig,save_dir+r"\fig3.pdf")
+    save(fig,save_dir+"F_batch.pdf")
     
     # ##########################################################################
     # # Plot PER DATASET and CLASSIFIER
 
     
-    figsize = mm2inch(190,90)
+    figsize = mm2inch(190,100)
     gridspec = {"hspace":0.05,"wspace":0.025,
                 "top":0.95,"left":0.05,
-                "right":0.925,"bottom":0.175}
+                "right":0.95,"bottom":0.14}
     
     fig,axes = plt.subplots(ncols=n_clf,
                             nrows=2,
@@ -218,23 +218,23 @@ if __name__=="__main__":
         for j, (clf,dfc) in enumerate( df.loc[m].groupby("classifier") ):
             plot(axes[i,j],dfc,ticks,fs)
             if i==0:
-                axes[0,j].set_title(lookup_2[clf],fontsize=fs+1)    
+                axes[0,j].set_title(lookup_2[clf],fontsize=fs)    
 
         axes[i,0].yaxis.set_label_position("left")
         
         if i==0:
-            axes[i,0].set_ylabel("DED",fontsize=fs+1,rotation=0,ha="center",va="center",labelpad=10)
+            axes[i,0].set_ylabel("DED",fontsize=fs,rotation=0,ha="center",va="center",labelpad=10)
         elif i==1:
-            axes[i,0].set_ylabel("OpenML",fontsize=fs+1,rotation=0,ha="center",va="center",labelpad=10)
+            axes[i,0].set_ylabel("OpenML",fontsize=fs,rotation=0,ha="center",va="center",labelpad=10)
                         
-    fig.text(0.975,0.55,ylabel,rotation=90,ha="center",va="center",fontsize=fs)
-    fig.text(0.5,0.1,xlabel,rotation=0,ha="center",va="center",fontsize=fs)
+    fig.text(0.995,0.55,ylabel,rotation=90,ha="center",va="center",fontsize=fs-2)
+    fig.text(0.5,0.075,xlabel,rotation=0,ha="center",va="center",fontsize=fs-2)
 
          
     handles,labels = axi.get_legend_handles_labels()
     fig.legend(handles,labels, loc="lower center",
-                frameon=False,ncol=len(labels),fontsize=fs+1)
+                frameon=False,ncol=len(labels),fontsize=fs)
 
-    save(fig,save_dir+r"\fig2.pdf")  
+    save(fig,save_dir+"F_dataset.pdf")  
 
     
