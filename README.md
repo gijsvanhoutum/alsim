@@ -11,6 +11,10 @@ compare them to other algorithms.
 <img src="icons/rnd.png">
 <img src="icons/awus.png">
 
+**AWUS** is a novel state-of-the-art active learning query strategy, outperforming
+all other strategies currently implemented, at very low computational cost. The journal
+paper can be found at [AWUS: Adaptive Weighted Uncertainty Sampling](https://www.sciencedirect.com/science/article/abs/pii/S2214860421005649).
+
 ## Main Features / Comments
 Major information:
 
